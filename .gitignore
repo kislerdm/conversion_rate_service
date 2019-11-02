@@ -1,0 +1,7 @@
+*.vscode
+*.DS_Store
+*__pycache__*
+.ipynb_checkpoints
+*ipycache*
+
+technical_test_training_data.csv
