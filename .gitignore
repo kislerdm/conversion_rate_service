@@ -1,0 +1,9 @@
+*.vscode
+*.DS_Store
+*__pycache__*
+.ipynb_checkpoints
+*ipycache*
+*env*
+*.pytest*
+gcp-key.json
+technical_test_training_data.csv

@@ -1,0 +1,7 @@
+learning_rate:
+  - 0.5
+n_estimators:
+  - 5
+  - 10
+max_depth:
+  - 5

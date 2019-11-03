@@ -1,0 +1,5 @@
+google-cloud-storage
+PyYAML==5.1
+pathlib
+./libs/common_pkg
+./libs/model_pkg
