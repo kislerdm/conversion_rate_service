@@ -30,7 +30,8 @@ def data_preparation(df: pd.DataFrame,
             and target column for train and test, and the error message text            
     """
     try:
-        X_train, X_test, y_train, y_test = train_test_split(df.drop([**cols_to_drop, target_col], axis=1),
+        cols_to_drop.append(target_col)
+        X_train, X_test, y_train, y_test = train_test_split(df.drop(cols_to_drop, axis=1),
                                                             df[target_col],
                                                             test_size=train_test_ratio,
                                                             shuffle=True,

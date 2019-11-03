@@ -45,9 +45,10 @@ class Model(model_template.Model):
         """
         if self.model is None:
             if config is None:
-                self.model = xgboost.XGBRegressor()
+                self.model = xgboost.XGBRegressor(objective='reg:squarederror')
             else:
-                self.model = xgboost.XGBRegressor(**config)
+                self.model = xgboost.XGBRegressor(**config, 
+                                                  objective='reg:squarederror')
 
     def train(self,
               X: pd.DataFrame,
@@ -113,8 +114,10 @@ class Model(model_template.Model):
                 path: path to save model into 
         """
         try:
+            if not os.path.isdir(path):
+                os.makedirs(path)                
             with open(os.path.join(path, 'model.pkl'), 'wb') as f:
-                f.write(pickle.dumps(self.model))
+                pickle.dump(self.model, f)
         except Exception as ex:
             raise ex
 
@@ -126,7 +129,7 @@ class Model(model_template.Model):
         """
         try:
             with open(path, 'rb') as f:
-                self.model = pickle.loads(f.read())
+                self.model = pickle.load(f)
         except Exception as ex:
             raise ex
 

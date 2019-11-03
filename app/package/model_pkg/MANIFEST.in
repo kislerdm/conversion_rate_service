@@ -1,2 +1,3 @@
-include install_dependecies.sh
-include LICENSE.txt
+global-include *.sh
+global-include LICENSE.txt
+global-include README.md
