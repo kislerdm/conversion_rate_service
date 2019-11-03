@@ -73,17 +73,17 @@ class Model(model_template.Model):
         return model_eval
     
     def grid_search(self,
-                    config: dict,
                     X: pd.DataFrame,
-                    y: pd.Series) -> NamedTuple('model_eval',
+                    y: pd.Series,
+                    config: dict) -> NamedTuple('model_eval',
                                                 mse=float):
         """Function for hyper-parameters tuning to search best configuration of the estimator
            Results in the best tuned estimator object being assigned to the Model.model attr
            
            Args:
-                config: dictionary with a grid of hyperparameters
                 X: pd.DataFrame with features values
                 y: target column values
+                config: dictionary with a grid of hyperparameters
 
            Returns: 
                 namedtuple with metrics values: 
