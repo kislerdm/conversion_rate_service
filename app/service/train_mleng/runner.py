@@ -45,7 +45,11 @@ def get_args():
 
     args = parser.parse_args()
     return args
-  
+
+
+PROJECT_ID = None  
+if PROJECT_ID is None:
+  PROJECT_ID = "sellics"
 
 MODEL_PKG_NAME = "conversion_rate_model"
 MODEL_VERSION = os.getenv("MODEL_VERSION")
@@ -142,7 +146,7 @@ if __name__ == "__main__":
     
     # get gs client (this step can be modified to access s3 bucket)
     try:
-        gs = storage.Client()
+        gs = storage.Client(project=PROJECT_ID)
     except Exception as ex:
       logs.send(f"Cannot connect to GS. Error:\n{ex}", 
                 lineno=logs.get_line(),

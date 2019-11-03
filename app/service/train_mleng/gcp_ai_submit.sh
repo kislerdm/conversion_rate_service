@@ -12,6 +12,5 @@ gcloud ai-platform jobs submit training ${JOB_NAME} \
   --config config.yaml \
   -- \
   --data-path=train/${VERSION}/data_computer.pkl \
-  --config-path=${VERSION}/params.yaml \
-  --model-dir=${VERSION} \
-  --webhook-url="https://hooks.slack.com/services/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"
+  --config-path=${VERSION}/params_test.yaml \
+  --model-dir=${VERSION}/$(TZ=":UTC" date +%Y/%m/%d/%H)
