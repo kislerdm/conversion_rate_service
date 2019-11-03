@@ -246,10 +246,16 @@ if __name__ == "__main__":
     tmp_model_dir = f"/tmp/{MODEL_VERSION}"
     dest_model_dir = os.path.join(BUCKET_MODEL, args.model_dir)
     model.save(tmp_model_dir)
+    
     try:
-        os.system(f"gsutil cp -r {tmp_model_dir}/* {dest_model_dir}")
+        bucket = gs.bucket(BUCKET_MODEL)
+        for obj in os.listdir(tmp_model_dir):
+          file_dir = os.path.join(tmp_model_dir, obj)
+          if os.path.isfile(file_dir):
+            bucket.blob(f"{args.model_dir}/{obj}")\
+                .upload_from_filename(file_dir)
     except Exception as ex:
-        logs.send(f"Cannot copy from '{tmp_model_dir}' to '{dest_model_dir}'. Error:\n{ex}",
+        logs.send(f"Cannot copy from '{file_dir}' to 'gs://{dest_model_dir}'. Error:\n{ex}",
                   lineno=logs.get_line(),
                   kill=True)
     try:
