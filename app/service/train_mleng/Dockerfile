@@ -6,7 +6,9 @@ LABEL maintainer="Dmitry Kisler" \
 
 # Required to access GCP services from ML Engine
 # Installs google cloud sdk, this is mostly for using gsutil to export model.
-RUN wget -nv \
+RUN apt-get update -y \
+  && apt-get install wget -y \
+  && wget -nv \
   https://dl.google.com/dl/cloudsdk/release/google-cloud-sdk.tar.gz \
   && mkdir /root/tools \
   && tar xvzf google-cloud-sdk.tar.gz -C /root/tools \
@@ -26,12 +28,21 @@ RUN echo '[GoogleCompute]\nservice_account = default' > /etc/boto.cfg
 VOLUME /data /model /config
 
 ARG WEBHOOK_URL=null
+ENV WEBHOOK_URL=${WEBHOOK_URL}
+
 # model version
 ARG MODEL_VERSION
+ENV MODEL_VERSION=${MODEL_VERSION}
+
 # GCP buckets
 ARG BUCKET_DATA
+ENV BUCKET_DATA=${BUCKET_DATA}
+
 ARG BUCKET_CONFIG
+ENV BUCKET_CONFIG=${BUCKET_CONFIG}
+
 ARG BUCKET_MODEL
+ENV BUCKET_MODEL=${BUCKET_MODEL}
 
 WORKDIR /app
 
@@ -44,6 +55,10 @@ COPY package libs
 RUN pip install --upgrade pip \
   # install custom packages and dependencies
   && pip install --no-cache-dir pytest -r requirements.txt \
+  # install model package OS dependencies
+  && apt-get install libgomp1 -y \
+  # && chmod +x libs/model_pkg/conversion_rate_model/${MODEL_VERSION}/os_dependencies.sh \
+  # && exec libs/model_pkg/conversion_rate_model/${MODEL_VERSION}/os_dependencies.sh \
   # test the model modules
   && pytest -v libs/model_pkg/tests/*.py \
   && if [ -d libs/model_pkg/tests/${MODEL_VERSION} ]; then pytest -v libs/model_pkg/tests/${MODEL_VERSION}/; fi

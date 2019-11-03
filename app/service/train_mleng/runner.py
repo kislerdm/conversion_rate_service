@@ -1,11 +1,10 @@
 import os
-import sys
 import time
 import yaml
+import argparse
 from typing import Tuple
 import pandas as pd
 import numpy as np
-import argparse
 from google.cloud import storage
 from service_pkg.logger import getLogger
 from service_pkg.file_io import load_data_pkl, load_data
@@ -14,11 +13,6 @@ from pathlib import Path
 
 
 np.random.seed(2019)
-
-DIR = str(Path(os.path.abspath(__file__)).parents[0])
-SERVICE_NAME = str(Path(os.path.abspath(__file__)).parents[2])
-if SERVICE_NAME in DIR:
-  SERVICE_NAME = DIR.replace(SERVICE_NAME, '')[1:]
 
 
 def get_args():
@@ -129,7 +123,7 @@ def is_gs_file(bucket: str,
       return False, f"Cannot list bucket files. Error:\n{ex}"
 
     if len(bucket_object) == 0:
-      return False, "Query '{obj}' doesn't exist"
+      return False, f"File '{obj}' doesn't exist"
 
     return True, None
 
@@ -138,14 +132,11 @@ if __name__ == "__main__":
     args = get_args()
     WEBHOOK_URL = args.webhook_url
     
-    logs = getLogger(f"{SERVICE_NAME}/{MODEL_VERSION}",
+    logs = getLogger(f"service/train-mleng/{MODEL_VERSION}",
                      webhook_url=WEBHOOK_URL)
     
     PATH_DATA = args.data_path
-
     PATH_CONFIG = args.config_path
-    if PATH_CONFIG is None:
-        PATH_CONFIG = os.path.join(MODEL_VERSION, "config.yaml")
     
     PATH_MODEL = args.model_dir
     if PATH_MODEL is None:
@@ -185,7 +176,18 @@ if __name__ == "__main__":
                 kill=True)
 
     # download the train data set
-    df, err = load_data_pkl(os.path.join(BUCKET_DATA, PATH_DATA))
+    try:
+      with open("/tmp/data.pkl", 'wb') as f:
+        gs.get_bucket(BUCKET_DATA)\
+            .get_blob(PATH_DATA)\
+            .download_to_file(f)
+    except Exception as ex:
+      logs.send(f"Cannot download data file.\nError: {ex}",
+                lineno=logs.get_line(),
+                kill=True)
+      
+    df, err = load_data_pkl("/tmp/data.pkl")
+    os.remove("/tmp/data.pkl")
     if err:
       logs.send(err,
                 lineno=logs.get_line(),
@@ -208,11 +210,11 @@ if __name__ == "__main__":
                 is_error=False,
                 kill=False)
       try:
-        config_test = gs.get_bucket(BUCKET_CONFIG)\
+        config_text = gs.get_bucket(BUCKET_CONFIG)\
                       .get_blob(PATH_CONFIG)\
                       .download_as_string()
-
-        config = yaml.safe_load(config_test)
+                      
+        config = yaml.safe_load(config_text)
       except Exception as ex:
         logs.send(ex,
                   lineno=logs.get_line(),
@@ -241,7 +243,7 @@ if __name__ == "__main__":
     except Exception as ex:
       logs.send(f"Model evaluation error: {ex}",
                 lineno=logs.get_line(),
-                kill=True)
+                kill=False)
     
     logs.send(f"Model eval performance: {metrics_eval}",
               is_error=False,
@@ -258,8 +260,12 @@ if __name__ == "__main__":
         logs.send(f"Cannot copy from '{tmp_model_dir}' to '{dest_model_dir}'. Error:\n{ex}",
                   lineno=logs.get_line(),
                   kill=True)
+    try:
+      os.system(f"rm -rf {tmp_model_dir}")
+    except Exception as ex:
+      pass
     
-    logs.send(f"Model saved to {dest_model_dir}.",
+    logs.send(f"Model saved to gs://{dest_model_dir}.",
               is_error=False,
               kill=False,
               webhook=True)
