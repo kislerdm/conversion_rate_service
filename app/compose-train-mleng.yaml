@@ -1,0 +1,12 @@
+version: "3.7"
+services:
+  train:
+    image: service/train-mleng:${MODEL_VER}
+    build:
+      context: .
+      dockerfile: "service/train_mleng/Dockerfile"
+      args:
+        - MODEL_VERSION=${MODEL_VER}
+        - BUCKET_DATA=${BUCKET_DATA_GCP}
+        - BUCKET_MODEL=${BUCKET_MODEL_GCP}
+        - BUCKET_CONFIG=${BUCKET_CONFIG_GCP}

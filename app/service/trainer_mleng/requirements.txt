@@ -1,0 +1,5 @@
+google-cloud-storage
+pandas==0.25.2
+sklearn==0.21.3
+xgboost==0.90
+PyYAML==5.1
