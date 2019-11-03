@@ -1,10 +1,17 @@
-#! /bin/bash
+#! /bin/sh
 
-docker run \
--v ${PWD}/gcp-key.json:/credentials.json \
--e GOOGLE_APPLICATION_CREDENTIALS=/credentials.json \
--t service/train-mleng:v1 \
---data-path=train/v1/data_computer.pkl \
---config-path=v1/params.yaml \
---model-dir=v1/model_computer.pkl \
---webhook-url="https://hooks.slack.com/services/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"
+VERSION=$1
+PROJECT_ID=sellics
+REGION=us-central1
+
+JOB_NAME=${PROJECT_ID}_$(TZ=":UTC" date +%Y%m%dT%H%M%SZ)
+
+gcloud ai-platform jobs submit training ${JOB_NAME} \
+  --master-image-uri gcr.io/${PROJECT_ID}/service/trainer:${VERSION} \
+  --region ${REGION} \
+  --config config.yaml \
+  -- \
+  --data-path=train/${VERSION}/data_computer.pkl \
+  --config-path=${VERSION}/params.yaml \
+  --model-dir=${VERSION} \
+  --webhook-url="https://hooks.slack.com/services/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"

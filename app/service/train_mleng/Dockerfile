@@ -27,9 +27,6 @@ RUN echo '[GoogleCompute]\nservice_account = default' > /etc/boto.cfg
 
 VOLUME /data /model /config
 
-ARG WEBHOOK_URL=null
-ENV WEBHOOK_URL=${WEBHOOK_URL}
-
 # model version
 ARG MODEL_VERSION
 ENV MODEL_VERSION=${MODEL_VERSION}

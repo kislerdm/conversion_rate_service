@@ -37,18 +37,6 @@ def get_args():
         required=False,
         help='The directory to store the model')
     parser.add_argument(
-        '--validation-split',
-        type=float,
-        default=0.3,
-        required=False,
-        help='Input batch size for testing (default: 0.3)')
-    parser.add_argument(
-        '--seed',
-        type=int,
-        default=2019,
-        required=False,
-        help='Random seed (default: 2019)')
-    parser.add_argument(
         '--webhook-url',
         type=str,
         default=None,
