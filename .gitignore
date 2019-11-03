@@ -5,4 +5,5 @@
 *ipycache*
 *env*
 *.pytest*
+gcp-key.json
 technical_test_training_data.csv

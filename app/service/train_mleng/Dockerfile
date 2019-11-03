@@ -25,6 +25,7 @@ RUN echo '[GoogleCompute]\nservice_account = default' > /etc/boto.cfg
 
 VOLUME /data /model /config
 
+ARG WEBHOOK_URL=null
 # model version
 ARG MODEL_VERSION
 # GCP buckets
@@ -37,7 +38,7 @@ WORKDIR /app
 # copy the service
 # to be modified to "COPY . ." if using ci/cd 
 # with the prior step of copying common_pkg to the service dir
-COPY service/trainer_mleng .
+COPY service/train_mleng .
 COPY package libs
 
 RUN pip install --upgrade pip \

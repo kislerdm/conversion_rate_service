@@ -8,5 +8,5 @@ services:
       args:
         - MODEL_VERSION=${MODEL_VER}
         - BUCKET_DATA=${BUCKET_DATA_GCP}
-        - BUCKET_MODEL=${BUCKET_MODEL_GCP}
         - BUCKET_CONFIG=${BUCKET_CONFIG_GCP}
+        - BUCKET_MODEL=${BUCKET_MODEL_GCP}
