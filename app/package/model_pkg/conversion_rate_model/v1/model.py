@@ -95,6 +95,7 @@ class Model(model_template.Model):
         
         grid = GridSearchCV(self.model,
                             param_grid=config,
+                            scoring='neg_mean_squared_error',
                             cv=3,
                             n_jobs=-1,
                             verbose=5)
