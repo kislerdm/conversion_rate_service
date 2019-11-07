@@ -4,7 +4,7 @@
 # Dmitry Kisler © 2019
 # www.dkisler.com
 
-pkgs=$1
+pkgs=libgomp1
 
 if [ ! -f /etc/os-release ]; then
   echo "Unrecognized OS"; exit 1
