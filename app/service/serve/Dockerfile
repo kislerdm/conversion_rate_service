@@ -1,0 +1,35 @@
+FROM python:3.7.4-slim-stretch AS base
+
+LABEL maintainer="Dmitry Kisler" \
+  email=admin@dkisler.com \
+  web=www.dkisler.com
+
+VOLUME /data /model
+
+# model version
+ARG MODEL_VERSION
+# alerts webhook url
+ENV WEBHOOK_URL null
+# path to model meta data
+ENV PATH_MODEL "model.pkl"
+# input data for prediction
+ENV PATH_DATA_IN "input.csv"
+# prediction output
+ENV PATH_DATA_OUT "input.csv.gz"
+
+WORKDIR /app
+
+# copy the service
+# to be modified to "COPY . ." if using ci/cd 
+# with the prior step of copying common_pkg to the service dir
+COPY service/serve .
+COPY package libs
+
+RUN pip install --upgrade pip \
+  # install custom packages and dependencies
+  && pip install --no-cache-dir pytest -r requirements.txt \
+  # test the model modules
+  && pytest -v libs/model_pkg/tests/*.py \
+  && if [ -d libs/model_pkg/tests/${MODEL_VERSION} ]; then pytest -v libs/model_pkg/tests/${MODEL_VERSION}/; fi
+
+ENTRYPOINT [ "python", "runner.py" ]
