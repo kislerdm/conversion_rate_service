@@ -1,0 +1,23 @@
+version: "3.7"
+services:
+  jupyter:
+    image: analytics/jupyter:1
+    build:
+      context: app
+      dockerfile: "jupyter/Dockerfile"
+    environment:
+      - PORT=8888
+  train:
+    image: service/train:v1
+    build:
+      context: app
+      dockerfile: "service/train/Dockerfile"
+      args:
+          - MODEL_VERSION=v1
+  serve:
+    image: service/serve:v1
+    build:
+      context: app
+      dockerfile: "service/serve/Dockerfile"
+      args:
+          - MODEL_VERSION=v1
