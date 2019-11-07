@@ -4,7 +4,7 @@
 # Dmitry Kisler © 2019
 # www.dkisler.com
 
-pkgs="libgomp1"
+pkgs=''
 
 if [[ ${pkgs} == '' ]]; then
   exit 0
