@@ -89,9 +89,8 @@ np.random.seed(2019)
 model = module.Model()
 
 
-def test_module_data_preparation():
+def test_module_data_preparation_train():
     X, y, err = module.data_preparation(DATASET)
-    print(X.columns)
     if err:
         raise Exception(err)
     assert y[0] == 0, \
@@ -99,6 +98,12 @@ def test_module_data_preparation():
     missing_columns = list(set(X.columns).difference(DATASET_MODEL_COL))
     assert len(missing_columns) == 0, \
         f"Columns {', '.join(missing_columns)} are not present in the prepared data set"    
+
+
+def test_module_data_preparation_predict():
+    X, y, err = module.data_preparation(DATASET, target_col=None)
+    if err:
+        raise Exception(err)
 
 
 def test_define_model():

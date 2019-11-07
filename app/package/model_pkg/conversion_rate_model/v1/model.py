@@ -24,7 +24,7 @@ spec.loader.exec_module(model_template)
 def data_preparation(df: pd.DataFrame,
                      target_col='cr',
                      cols_to_drop=['entity_id']) -> Tuple[pd.DataFrame,
-                                                          pd.Series, 
+                                                          pd.Series,
                                                           str]:
     """Function to align data with the model requirements
 
@@ -39,9 +39,10 @@ def data_preparation(df: pd.DataFrame,
                   and the error message text            
     """
     try:
-        return df.drop([*[target_col], *cols_to_drop], axis=1), \
-               df[target_col].astype(np.float16), \
-               None
+        if target_col is None:
+            return df.drop(cols_to_drop, axis=1), None, None
+        return df.drop([*cols_to_drop, *[target_col]], axis=1), df[target_col], None
+
     except Exception as ex:
         return None, None, ex
 
@@ -56,15 +57,15 @@ class Model(model_template.Model):
     def _model_definition(self,
                           config=None):
         """Function to define and compile the model
-            
+
         Args:
             config: dict with model hyperparameters
-        
+
         Returns:
             model object
         """
         if self.model is None:
-          self.model = LinearRegression()
+            self.model = LinearRegression()
 
     def train(self,
               X: pd.DataFrame,
@@ -93,7 +94,10 @@ class Model(model_template.Model):
         """Model saver method
 
         Args:
-            path: path to save model into 
+            path: path to save model into
+
+        Raises:
+            IOError, save error
         """
         try:
             if not os.path.isdir(path):
@@ -107,7 +111,10 @@ class Model(model_template.Model):
         """Model loader method
 
         Args:
-            path: path to save model into 
+            path: path to save model into
+
+        Raises:
+            IOError, load error
         """
         try:
             with open(path, 'rb') as f:
@@ -115,11 +122,14 @@ class Model(model_template.Model):
         except Exception as ex:
             raise ex
 
-    def predict(self, X: pd.DataFrame):
+    def predict(self, X: pd.DataFrame) -> pd.Series:
         """Predict method
 
         Args:
             X: pd.DataFrame with features values
+
+        Raises:
+            Prediction error
         """
         if self.model is None:
             return None
