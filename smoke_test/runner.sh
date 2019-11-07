@@ -62,7 +62,7 @@ fi
 
 # test prediction output complience with SLA
 header=$(zless ${BUCKET_DATA_PREDICT}/${PATH_DATA_OUT} | head -1)
-if [ ${header} != "${SLA_HEADER}" ]; then
+if [[ ${header} != "${SLA_HEADER}" ]]; then
   rm -rf ${BUCKET_MODEL}/${MODEL_PREFIX} \
          ${BUCKET_DATA_PREDICT}/input/${PREFIX} \
          ${BUCKET_DATA_PREDICT}/output/${PREFIX}
@@ -72,7 +72,7 @@ if [ ${header} != "${SLA_HEADER}" ]; then
 fi
 
 vals=$(zless ${BUCKET_DATA_PREDICT}/${PATH_DATA_OUT} | tail -1 | awk -F "." '{print $1}')
-if [ ${vals} != "${EXPECTED_OUTPUT}" ]; then
+if [[ ${vals} != "${EXPECTED_OUTPUT}" ]]; then
   msg "WARNING! Prediction results don't match expectations. Check the model definition."
 fi
 
