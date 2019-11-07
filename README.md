@@ -154,14 +154,14 @@ Call helper to see the options:
 
 ![infrastructure](docs/fig/fig_infra.jpg)
 
-An illustrates above architecture can be proposed to host the data pipelines required to run (train+serve) the ranking service.
+An illustrates above architecture can be proposed to host the data pipelines required to run (train+serve) the prediction service.
 
 Depending on the data amount the serve service can be deployed and executed
 
 - using AWS ECS+Fargate, or on GCP Cloud Run services. GCP however would require to convert existing service to web-servers.
 - using AWS Sagemaker, or on [GCP ML Engine](#model-re-train-on-a-cloud) in case higher scalability at low effort would be required.
 
-The pipeline part shown inside the dashed rectangle is being built and considered within the scope of this task exclusively. It is being mimicked using local disk storage instead of s3 buckets and local docker runner machine instead of ECS/Fargate services.
+The pipeline part shown inside the dashed rectangle is being built and considered within the scope of this task exclusively. It is being mimicked using local disk storage instead of s3 buckets and local docker runner machine instead of ECS+Fargate/GCP Cloud Run services.
 
 ### Modus operandi
 
