@@ -9,12 +9,15 @@ import numpy as np
 from service_pkg.logger import getLogger
 from service_pkg.file_io import load_data, save_data
 import importlib
+import warnings
+warnings.simplefilter(action='ignore', 
+                      category=FutureWarning)
 
 
 WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 
 MODEL_PKG_NAME = "conversion_rate_model"
-MODEL_VERSION = os.getenv("MODEL_VERSION", "v0")
+MODEL_VERSION = os.getenv("MODEL_VERSION", "v1")
 
 BUCKET_MODEL = "/model"
 PATH_MODEL = os.getenv("PATH_MODEL", 
@@ -33,7 +36,8 @@ PATH_DATA_OUT = os.getenv("PATH_DATA_OUT",
                                        time.strftime('%Y/%m/%d'),
                                        "predict_output.csv.gz"))
 
-COL_ID = "entity_id"
+COL_DIMS = ["entity_id", "device"]
+COL_TARGET = 'cr'
 
 
 if __name__ == "__main__":
@@ -77,7 +81,7 @@ if __name__ == "__main__":
                   lineno=logs.get_line(),
                   kill=True)
 
-    X, y, err = model_definition.data_preparation(df, target=None)
+    X, y, err = model_definition.data_preparation(df, target_col=None)
     if err:
         logs.send(f"Input data structure is not aligned with the model requirements. Error:\n{err}",
                   lineno=logs.get_line(),
@@ -88,6 +92,7 @@ if __name__ == "__main__":
     try:
         prediction_results = model.predict(X)
         t = round(time.time() - t0, 2)
+        df_prediction = pd.DataFrame({COL_TARGET: prediction_results})
         logs.send(f"Prediction completed. Elapsed time: {t} sec. Saving results.", 
                   is_error=False)
     except Exception as ex:
@@ -97,10 +102,8 @@ if __name__ == "__main__":
 
     # convert results to comply with the output SLA
     try:
-        df_prediction_results = pd.DataFrame({
-            eval(COL_ID): df[COL_ID]
-            })
-        df_prediction_results.append(prediction_results)
+        df_prediction_results = pd.concat([df[COL_DIMS], df_prediction], 
+                                          axis=1)
     except Exception as ex:
         logs.send(f"Cannot convert prediction according to output SLA. Error:\n{ex}",
                   lineno=logs.get_line(),

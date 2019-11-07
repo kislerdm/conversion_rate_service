@@ -8,6 +8,7 @@ VOLUME /data /model
 
 # model version
 ARG MODEL_VERSION
+ENV MODEL_VERSION "v1"
 # alerts webhook url
 ENV WEBHOOK_URL null
 # path to model meta data
@@ -28,6 +29,9 @@ COPY package libs
 RUN pip install --upgrade pip \
   # install custom packages and dependencies
   && pip install --no-cache-dir pytest -r requirements.txt \
+  # install dependencies
+  && export PATH_MISC=libs/model_pkg/conversion_rate_model/${MODEL_VERSION}/install_dependencies.sh \
+  && if [ -f ${PATH_MISC} ]; then sh ${PATH_MISC}; fi \
   # test the model modules
   && pytest -v libs/model_pkg/tests/*.py \
   && if [ -d libs/model_pkg/tests/${MODEL_VERSION} ]; then pytest -v libs/model_pkg/tests/${MODEL_VERSION}/; fi

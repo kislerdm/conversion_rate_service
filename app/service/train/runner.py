@@ -9,6 +9,9 @@ import numpy as np
 from service_pkg.logger import getLogger
 from service_pkg.file_io import load_data, save_data
 import importlib
+import warnings
+warnings.simplefilter(action='ignore', 
+                      category=FutureWarning)
 
 
 np.random.seed(2019)

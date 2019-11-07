@@ -8,6 +8,7 @@ VOLUME /data /model
 
 # model version
 ARG MODEL_VERSION
+ENV MODEL_VERSION "v1"
 # alerts webhook url
 ENV WEBHOOK_URL null
 # prefix to store the model

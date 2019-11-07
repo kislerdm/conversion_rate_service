@@ -1,0 +1,22 @@
+version: "3.7"
+services:
+  serve:
+    image: service/serve:${MODEL_VER}
+    build:
+      context: .
+      dockerfile: "service/serve/Dockerfile"
+      args:
+        - MODEL_VERSION=${MODEL_VER}
+    volumes:
+      - type: bind
+        source: ${BUCKET_DATA_PREDICT}
+        target: /data
+      - type: bind
+        source: ${BUCKET_MODEL}
+        target: /model
+    environment:
+      - WEBHOOK_URL=${WEBHOOK}
+      - MOVEL_VERSION=${MODEL_VER}
+      - PATH_MODEL=${PATH_MODEL}
+      - PATH_DATA_IN=${PATH_DATA_IN}
+      - PATH_DATA_OUT=${PATH_DATA_OUT}

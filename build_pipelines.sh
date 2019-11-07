@@ -107,7 +107,7 @@ check_docker_ver () {
 }
 
 # verify docker
-msg "Verify docker version"
+msg "Verify docker installation"
 check_docker_ver
 if [ $? -eq 0 ]; then msg "OK"; 
 else msg "Missing required docker version, please check requirements";
