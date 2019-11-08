@@ -172,7 +172,7 @@ The pipeline part shown inside the dashed rectangle is being built and considere
 3. Train the model
 4. Save the model metadata into destination, e.g. s3, or gs bucket
 
-*) It is advised to perform all data preparation on the level of data platform/DWH (e.g. in redshift, or snowflake, or bigquery) steps prior to training stage. **!Note!** the services for in-database data preparation and for unloading data from database to the bucket are beyond the scope of this task.
+*) It is advised to perform all data preparation on the level of data platform/DWH (e.g. in redshift, or snowflake, or bigquery) steps prior to training stage. **!Note!** the services for in-database data preparation and for unloading data from database to the bucket are beyond the scope of this task. The train/eval/predict data sets are being prepared and stored in `bucket/data` (see details in [the notebook](#modelingexperimentation)).
 
 #### Serve Service
 
@@ -193,7 +193,7 @@ Both services push an alert/info message as a webhook to slack (requires WEBHOOK
 
 Please see details of experimentation in the jupyter notebook ``./analytics/analytics.ipynb``. It should be accessible on http://localhost:9999/lab/tree/analytics/analytics.ipynb if you successfully completed [the first-time run step](#first-time-run).
 
-### Model re-train on a cloud
+### Model re-train on a cloud - ToDo
 
 GCP ML Engine is being used for faster model experimentation and retraining:
 
@@ -210,3 +210,20 @@ Infra:
 - GS:
   - 
 ```
+
+
+## Followup/further ToDo's
+
+### Infrastructure
+
+- Models version control with e.g. [DVC](https://dvc.org/)
+- Add ci/cd
+- Add metrics push to cloudwatch, or prometheus integration
+- Orchestrator for pipelines, e.g. with apache airflow
+- Deploy the serve service as web-serve to make real-time conversion rate prediction
+
+### Model
+
+- Enlarge data sample
+- Employ advanced classes ("CR > 0" and "CR = 0") balancing techniques
+- Add more time-series periods to capture keywords conversion rate probability seasonality
