@@ -13,8 +13,8 @@ A data science project flow described in [the article](https://towardsdatascienc
    - Model v1/MVP development
 2. Service infrastructure/platform development:
    - Developments of dockerized services to train and serve the baseline model
-   - Generalization of the services with aim to be capable to consume any model and run prediction, or to consume any model definition and train it.
-   - Baseline model packaging
+   - Generalization of the services with aim to be capable to consume any model and run prediction, or to consume any model definition and train it
+   - v1 model packaging
    - Service automated unit and smoke/integration tests
 3. Iterative model performance improvement:
    - Further feature engineering
