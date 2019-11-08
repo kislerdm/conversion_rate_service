@@ -193,7 +193,17 @@ Both services push an alert/info message as a webhook to slack (requires WEBHOOK
 
 Please see details of experimentation in the jupyter notebook ``./analytics/analytics.ipynb``. It should be accessible on http://localhost:9999/lab/tree/analytics/analytics.ipynb if you successfully completed [the first-time run step](#first-time-run).
 
-### Model re-train on a cloud - ToDo
+### Models Performance
+
+|model|MSEx1e5 on 'eval' set|MSEx1e5 on 'overall' set|comment|
+|--|--|--|--|
+|baseline_1|2325|2100|predicting 0 for all entities|
+|baseline_2|2197|1913|predicting the mean of the entire train data set|
+|baseline_3|2184|1903|predicting the mean of the train data set by device|
+|baseline_4|413|762|predicting the mean of the train data set by entity_id<br>**not realistic estimation**. It can be *potentially* reached by models highly overfitting to a given data set because in most of the cases there is only one data point per entity_id per week and device|
+|v1|2179|1886|linear regressor<br>features: *att*{2, 5, 6, 27, 28, 34}, *atts_norm*, *device*]|
+
+### Model Re-train on a Cloud - ToDo
 
 GCP ML Engine is being used for faster model experimentation and retraining:
 
@@ -210,7 +220,6 @@ Infra:
 - GS:
   - 
 ```
-
 
 ## Followup/further ToDo's
 
