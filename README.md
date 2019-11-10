@@ -2,7 +2,7 @@
 
 ![sellics_logo](https://sellics.com/wp-content/uploads/2018/02/sellics-fb.jpg)
 
-The problem description can be found [here](docs/technical_test_-_instructions.docx). Its main objective is, *to develop a service to predict conversion rate probability* for users searching a given keyword based on the keyword attributes and the device users used for a search.
+The problem description can be found [here](docs/instructions/technical_test_-_instructions.pdf). Its main objective is, *to develop a service to predict conversion rate probability* for users searching a given keyword based on the keyword attributes and the device users used for a search.
 
 A data science project flow described in [the article](https://towardsdatascience.com/how-to-power-up-your-product-by-machine-learning-with-python-microservice-pt-1-de0f2b434bec) is being followed. The task is being split into **three stages**:
 
@@ -31,6 +31,8 @@ The main objective of the proposed solution is completed the *stages 1 and 2*:
 Additional objective is, to improve the model performance of the model.
 
 ---
+
+**!Note!** Ideas for strategic task can be found [here](docs/strategic_task/sellics_strategic_projects.md).
 
 ## How to execute the code base
 
