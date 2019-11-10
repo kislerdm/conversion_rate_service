@@ -1,5 +1,5 @@
 # Dmitry Kisler © 2019
-# admin@dkisler.com
+# www.dkisler.com
 
 from collections import namedtuple
 from typing import Tuple, NamedTuple, Any
@@ -7,38 +7,32 @@ import numpy as np
 import pandas as pd
 from abc import ABC, abstractmethod
 from sklearn import metrics
-from sklearn.model_selection import train_test_split
 
 
 def data_preparation(df: pd.DataFrame,
                      target_col='cr',
-                     cols_to_drop=[],
-                     train_test_ratio=0.3) -> Tuple[pd.DataFrame, 
-                                                    pd.DataFrame,
-                                                    pd.Series,
-                                                    pd.Series, str]:
+                     cols_to_drop=['entity_id']) -> Tuple[pd.DataFrame,
+                                                          pd.Series,
+                                                          str]:
     """Function to align data with the model requirements
 
-       Args:
-            df: input data frame
-            target_col: target column name
-            cols_to_drop: additional list of columns to drop
-            train_test_split: train-test split share
+    Args:
+        df: input data frame
+        target_col: target column name
+        cols_to_drop: additional list of columns to drop
 
-       Returns:
-            tuple of the features DataFrame for train, test 
-            and target column for train and test, and the error message text            
+    Returns:
+        tuple of the features DataFrame, 
+                  target column 
+                  and the error message text            
     """
     try:
-        cols_to_drop.append(target_col)
-        X_train, X_test, y_train, y_test = train_test_split(df.drop(cols_to_drop, axis=1),
-                                                            df[target_col],
-                                                            test_size=train_test_ratio,
-                                                            shuffle=True,
-                                                            random_state=2019)
-        return X_train, X_test, y_train, y_test, None
+        if target_col is None:
+            return df.drop(cols_to_drop, axis=1), None, None
+        return df.drop([*cols_to_drop, *[target_col]], axis=1), df[target_col], None
+
     except Exception as ex:
-        return None, None, None, None, ex
+        return None, None, ex
     
 
 class Model(ABC):

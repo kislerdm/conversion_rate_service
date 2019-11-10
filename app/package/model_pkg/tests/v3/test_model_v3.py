@@ -17,16 +17,18 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 DIR = Path(os.path.abspath(__file__)).parents[2]
 
 PACKAGE = "conversion_rate_model"
-SUFFIX = "v1"
+SUFFIX = "v3"
 MODULE = "model"
 
 model_methods = ['_model_definition', 'predict',
-                 'score', 'model_eval', 
-                 'train', 'save', 'load']
+                 'score', 'model_eval',
+                 'train', 'grid_search',
+                 'save', 'load']
 
 model_score = ['mse']
 
 DATASET = """cr,entity_id,computer,smartphone,attrs_scale,att5,att27,att2,att34,att29,att30,att9,att7,att142,att11
+0.0,4,1,0,0.531555207504427,1,0,0,1,1,0,0,0,0,0
 0.0,4,1,0,0.531555207504427,1,0,0,1,1,0,0,0,0,0
 """
 
@@ -67,6 +69,7 @@ module = load_module(MODULE)
 def test_module_has_model_class():
     assert 'Model' in module.__dir__(), \
         f"Model class is not present in the {MODULE}.py"
+    return
 
 
 def test_model_class_methods():
@@ -79,6 +82,7 @@ def test_model_class_methods():
 def test_module_has_preparation_func():
   assert 'data_preparation' in module.__dir__(), \
       f"data_preparation function is not present in the {MODULE}.py"
+  return
 
 
 def test_model_eval_elements():
@@ -99,7 +103,7 @@ def test_module_data_preparation_train():
         "data_preparation function error"
     missing_columns = list(set(X.columns).difference(DATASET_MODEL_COL))
     assert len(missing_columns) == 0, \
-        f"Columns {', '.join(missing_columns)} are not present in the prepared data set"    
+        f"Columns {', '.join(missing_columns)} are not present in the prepared data set"
 
 
 def test_module_data_preparation_predict():
@@ -118,10 +122,25 @@ def test_train_model():
     X, y, err = module.data_preparation(DATASET)
     if err:
         assert Exception(err)
-        
+
     model_score = model.train(X, y)
     assert model is not None, \
         "Model train error"
+
+
+def test_grid_search():
+    X, y, err = module.data_preparation(DATASET)
+    if err:
+        assert Exception(err)
+
+    grid_config = {
+        "learning_rate": [1],
+        "n_estimators": [1],
+        "max_depth": [1]
+    }
+    model_score = model.grid_search(X, y, grid_config)
+    assert model is not None, \
+        "Model gridSearch error"
 
 
 def test_save_model():

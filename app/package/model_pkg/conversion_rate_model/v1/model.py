@@ -1,5 +1,5 @@
 # Dmitry Kisler © 2019
-# admin@dkisler.com
+# www.dkisler.com
 
 import os
 from typing import Tuple, NamedTuple
@@ -9,7 +9,8 @@ import pickle
 from sklearn import metrics
 from sklearn.linear_model import LinearRegression
 import importlib.util
-
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 # import model abstract class
 module_name = "model_template"
@@ -21,30 +22,7 @@ model_template = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(model_template)
 
 
-def data_preparation(df: pd.DataFrame,
-                     target_col='cr',
-                     cols_to_drop=['entity_id']) -> Tuple[pd.DataFrame,
-                                                          pd.Series,
-                                                          str]:
-    """Function to align data with the model requirements
-
-    Args:
-        df: input data frame
-        target_col: target column name
-        cols_to_drop: additional list of columns to drop
-
-    Returns:
-        tuple of the features DataFrame, 
-                  target column 
-                  and the error message text            
-    """
-    try:
-        if target_col is None:
-            return df.drop(cols_to_drop, axis=1), None, None
-        return df.drop([*cols_to_drop, *[target_col]], axis=1), df[target_col], None
-
-    except Exception as ex:
-        return None, None, ex
+data_preparation = model_template.data_preparation
 
 
 class Model(model_template.Model):

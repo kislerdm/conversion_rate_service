@@ -1,5 +1,5 @@
 # Dmitry Kisler © 2019
-# admin@dkisler.com
+# www.dkisler.com
 
 import os
 from typing import Tuple, NamedTuple
@@ -10,6 +10,8 @@ from sklearn import metrics
 from sklearn.model_selection import GridSearchCV
 import xgboost
 import importlib.util
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 # import model abstract class
 module_name = "model_template"
@@ -26,13 +28,18 @@ data_preparation = model_template.data_preparation
 
 class Model(model_template.Model):
     """"Model definition class"""
-
+    CONFIG = {
+        "learning_rate": 0.1,
+        "n_estimators": 40,
+        "max_depth": 10
+    }
+    
     def __init__(self,
                  model=None):
         self.model = model
 
     def _model_definition(self, 
-                          config=None):
+                          config=CONFIG):
         """Function to define and compile the model
             
            Args:
@@ -91,12 +98,12 @@ class Model(model_template.Model):
         if self.model is None:
             self._model_definition(config=None)
         
-        grid = GridSearchCV(self.model,
+        grid = GridSearchCV(estimator=self.model,
                             param_grid=config,
                             scoring='neg_mean_squared_error',
-                            cv=3,
+                            cv=2,
                             n_jobs=-1,
-                            verbose=5)
+                            verbose=2)
         # find best tuned estimator
         grid.fit(X, y)
         self.model = grid.best_estimator_
