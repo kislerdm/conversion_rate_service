@@ -197,14 +197,14 @@ Please see details of experimentation in the jupyter notebook ``./analytics/anal
 
 ### Models Performance
 
-|model|MSEx1e5 on 'train' set|MSEx1e5 on 'eval' set|MSEx1e5 on 'overall' set|Improvement of MSE on 'overall' set [%]|comment|
+|model|MSEx10e5 on 'train' set|MSEx10e5 on 'eval' set|MSEx10e5 on 'overall' set|Improvement of MSE on 'overall' set [%]|comment|
 |--|--|--|--|--|--|
-|baseline0|21253|20008|21004|NaN|predicting 0 for all entities
-|baseline1|19349|18240|19127|9.8|predicting the mean of the entire train data set
-|baseline2|19252|18110|19025|0.5|predicting the mean of the train data set by device
-|model_v1|19031|17941|18813|1.1|linear regressor trainer on *v1* data set
-|model_v2|18712|17949|18559|1.4|XGBoost regressor trainer on *v1* data set
-|model_v3|18653|17880|18498|0.3|XGBoost regressor (hypertuning) trainer on *v1* data set
+|baseline0|21251|20006|21002|NaN|predicting 0 for all entities
+|baseline1|19348|18249|19119|9.8|predicting the mean of the entire train data set
+|baseline2|19256|18112|19027|0.5|predicting the mean of the train data set by device
+|model_v1|18957|17854|18736|1.6|linear regressor trainer on *v1* data set
+|model_v2|18708|17946|18556|1.0|XGBoost regressor trainer on *v1* data set
+|model_v3|18647|17927|18503|0.3|XGBoost regressor (hyperparameters tuning) trainer on *v1* data set
 
 ### Model Re-train on a Cloud
 
