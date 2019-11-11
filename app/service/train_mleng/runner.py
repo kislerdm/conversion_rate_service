@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 from google.cloud import storage
 from service_pkg.logger import getLogger
-from service_pkg.file_io import load_data_pkl, load_data
+from service_pkg.file_io import load_data
 import importlib
 from pathlib import Path
 
@@ -22,10 +22,15 @@ def get_args():
     """
     parser = argparse.ArgumentParser(description='cr prediction train')
     parser.add_argument(
-        '--data-path',
+        '--train-path',
         default=None,
         required=True,
-        help='Path to data sample')
+        help='Path to train data sample')
+    parser.add_argument(
+        '--eval-path',
+        default=None,
+        required=False,
+        help='Path to eval data sample')
     parser.add_argument(
         '--config-path',
         default=None,
@@ -52,21 +57,13 @@ if PROJECT_ID is None:
   PROJECT_ID = "sellics"
 
 MODEL_PKG_NAME = "conversion_rate_model"
-MODEL_VERSION = os.getenv("MODEL_VERSION")
-if MODEL_VERSION is None:
-  MODEL_VERSION = "v1"
+MODEL_VERSION = os.getenv("MODEL_VERSION", "v1")
 
-BUCKET_DATA = os.getenv("BUCKET_DATA")
-if BUCKET_DATA is None:
-  BUCKET_DATA = "/data"
+BUCKET_DATA = os.getenv("BUCKET_DATA", "/data")
 
-BUCKET_CONFIG = os.getenv("BUCKET_CONFIG")
-if BUCKET_CONFIG is None:
-  BUCKET_CONFIG = "/config"
+BUCKET_CONFIG = os.getenv("BUCKET_CONFIG", "/config")
 
-BUCKET_MODEL = os.getenv("BUCKET_MODEL")
-if BUCKET_MODEL is None:
-  BUCKET_MODEL = "/model"
+BUCKET_MODEL = os.getenv("BUCKET_MODEL", "/model")
 
 
 def is_gs_bucket(bucket: str) -> Tuple[bool, str]:
@@ -127,7 +124,8 @@ if __name__ == "__main__":
     logs = getLogger(f"service/train-mleng/{MODEL_VERSION}",
                      webhook_url=WEBHOOK_URL)
     
-    PATH_DATA = args.data_path
+    PATH_DATA = args.train_path
+    PATH_EVAL = args.eval_path
     PATH_CONFIG = args.config_path
     
     PATH_MODEL = args.model_dir
@@ -166,10 +164,16 @@ if __name__ == "__main__":
       logs.send(err, 
                 lineno=logs.get_line(), 
                 kill=True)
+    
+    flag_eval, err = is_gs_file(bucket=BUCKET_DATA, obj=PATH_EVAL)
+    if err:
+      logs.send(f"Eval data set not found.\nError: {err}",
+                lineno=logs.get_line(),
+                kill=False)
 
     # download the train data set
     try:
-      with open("/tmp/data.pkl", 'wb') as f:
+      with open("/tmp/data.csv.gz", 'wb') as f:
         gs.get_bucket(BUCKET_DATA)\
             .get_blob(PATH_DATA)\
             .download_to_file(f)
@@ -178,15 +182,14 @@ if __name__ == "__main__":
                 lineno=logs.get_line(),
                 kill=True)
       
-    df, err = load_data_pkl("/tmp/data.pkl")
-    os.remove("/tmp/data.pkl")
+    df_train, err = load_data("/tmp/data.csv.gz")
     if err:
-      logs.send(err,
+      logs.send(f"Cannot read train data set.\nError: {err}",
                 lineno=logs.get_line(),
                 kill=True)
     
     # prepare data for training
-    X_train, X_test, y_train, y_test, err = model_pkg.data_preparation(df)
+    X, y, err = model_pkg.data_preparation(df_train)
     if err:
       logs.send(err,
                 lineno=logs.get_line(),
@@ -197,7 +200,14 @@ if __name__ == "__main__":
     
     # read the config in case it's provided
     t0 = time.time()
-    if PATH_CONFIG:
+    if "grid_search" not in model.__dir__() or PATH_CONFIG is None:
+      logs.send("Start training",
+                is_error=False,
+                kill=False)
+
+      metrics_train = model.train(X=X,
+                                  y=y)
+    else:
       logs.send("Start training with grid search",
                 is_error=False,
                 kill=False)
@@ -212,34 +222,14 @@ if __name__ == "__main__":
                   lineno=logs.get_line(),
                   kill=True)
       
-      metrics_train = model.grid_search(X=X_train,
-                                        y=y_train,
+      metrics_train = model.grid_search(X=X,
+                                        y=y,
                                         config=config)
-    else:
-      logs.send("Start training",
-                is_error=False,
-                kill=False)
-      
-      metrics_train = model.train(X=X_train,
-                                  y=y_train)
-    
+  
     t = round(time.time() - t0, 2)
     logs.send(f"Training completed. Elapsed time: {t} sec.\nModel performance: {metrics_train}",
               is_error=False,
               kill=False, 
-              webhook=True)
-
-    # evaluate model on test data set
-    try:
-      metrics_eval = model.score(y_test, model.predict(X_test))
-    except Exception as ex:
-      logs.send(f"Model evaluation error: {ex}",
-                lineno=logs.get_line(),
-                kill=False)
-    
-    logs.send(f"Model eval performance: {metrics_eval}",
-              is_error=False,
-              kill=False,
               webhook=True)
     
     # save the model
@@ -258,12 +248,41 @@ if __name__ == "__main__":
         logs.send(f"Cannot copy from '{file_dir}' to 'gs://{dest_model_dir}'. Error:\n{ex}",
                   lineno=logs.get_line(),
                   kill=True)
-    try:
-      os.system(f"rm -rf {tmp_model_dir}")
-    except Exception as ex:
-      pass
     
     logs.send(f"Model saved to gs://{dest_model_dir}.",
               is_error=False,
               kill=False,
               webhook=True)
+    
+    # evaluate model
+    if flag_eval:
+      # download the train data set
+      try:
+        with open("/tmp/data.csv.gz", 'wb') as f:
+          gs.get_bucket(BUCKET_DATA)\
+              .get_blob(PATH_EVAL)\
+              .download_to_file(f)
+      except Exception as ex:
+        logs.send(f"Cannot download eval file. Done!",
+                  lineno=logs.get_line(),
+                  is_error=False,
+                  kill=True)
+
+      df_eval, err = load_data("/tmp/data.csv.gz")
+      if err:
+        logs.send(f"Cannot read eval data set.\nError: {err}",
+                  lineno=logs.get_line(),
+                  is_error=False,
+                  kill=True)
+      try:
+        X, y, err = model_pkg.data_preparation(df_eval)
+        metrics_eval = model.score(y, model.predict(X))
+      except Exception as ex:
+        logs.send(f"Model evaluation error: {ex}",
+                  lineno=logs.get_line(),
+                  kill=False)
+
+      logs.send(f"Model eval performance: {metrics_eval}",
+                is_error=False,
+                kill=False,
+                webhook=True)

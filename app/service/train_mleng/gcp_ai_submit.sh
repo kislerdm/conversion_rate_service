@@ -14,8 +14,9 @@ for platform in ${platforms[@]}; do
     --region ${REGION} \
     --config config.yaml \
     -- \
-    --data-path=train/${VERSION}/data_${platform}.pkl \
+    --data-path=train/${VERSION}/train.csv.gz \
+    --eval-path=train/${VERSION}/eval.csv.gz \
     --config-path=${VERSION}/${PARAMS}.yaml \
     --model-dir=${VERSION}/${platform}/${PARAMS}/$(TZ=":UTC" date +%Y/%m/%d/%H) \
-    --webhook-url="https://hooks.slack.com/services/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"
+    --webhook-url=${WEBHOOK_URL}
 done
