@@ -1,8 +1,9 @@
 #! /bin/bash
 
 # builder of the services
+# run it for as the first time launcher
 # Dmitry Kisler © 2019
-# admin@dkisler.com
+# www.dkisler.com
 
 SCRIPT_BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
@@ -59,7 +60,7 @@ run_docker_jupyter() {
     -p ${PORT_NOTEBOOK}:8888 \
     -t analytics/jupyter:1
 
-    if [ $? -eq 0 ]; then
+    if [[ "$?" == "0" ]]; then
       url="http://localhost:${PORT_NOTEBOOK}/lab/tree/${PATH_TO_NOTEBOOK}"
       msg "Click ${url} to launch a notebook"
 
@@ -72,7 +73,8 @@ run_docker_jupyter() {
       else
         msg "Cannot open jupyter-lab in browser. Please try manually"
       fi
-
+    else
+        msg "Verify that the port ${PORT_NOTEBOOK} is free."
     fi
 }
 
@@ -82,13 +84,40 @@ check_docker_ver || exit 1
 # build service images
 msg "Build docker images"
 docker-compose -f ${SCRIPT_BASE_PATH}/cold-start.yaml build
+if [[ "$?" != '0' ]]; then
+    msg "Error while building images. Please contact admin@dkisler.com"
+    exit 1
+fi
 
 # smoke test
 msg "Run end2end smoke test"
-sh smoke_test/runner.sh
+sh smoke_test/runner.sh 
+if [[ "$?" != '0' ]]; then
+    msg "Smoke test wasn't finished sucessfully"
+    exit 1
+fi
+
+# smoke test
+msg "Copy prepared data sets as date-partitioned objects"
+# train data sets
+TMP_DIR=${SCRIPT_BASE_PATH}/bucket/data/train/features_v1
+cp -v ${TMP_DIR}/*.gz ${TMP_DIR}/$(date +'%Y/%m/%d')/
+if [[ "$?" != '0' ]]; then
+    msg "Check the repo. Bucket dir seems to be corrupted"
+    exit 1
+fi
+
+# predict data sets
+TMP_DIR=${SCRIPT_BASE_PATH}/bucket/data/predict/input/features_v1
+cp -v ${TMP_DIR}/*.gz ${TMP_DIR}/$(date +'%Y/%m/%d')/
+if [[ "$?" != '0' ]]; then
+    msg "Check the repo. Bucket dir seems to be corrupted"
+    exit 1
+fi
 
 msg "Launch jupyter-lab with analytics notebook"
 run_docker_jupyter
+
 #
 msg "Happy task evaluation! :) 
 Feel free to drop a line on admin@dkisler.com in case of questions."

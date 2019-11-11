@@ -81,22 +81,22 @@ OS=$(get_os)
 
 docker_web () {
     msg "docker not installed. See https://docs.docker.com/install"
-    if [ '${OS}' == 'OSX' ]; then
+    if [[ "${OS}" == "OSX" ]]; then
         open https://docs.docker.com/docker-for-mac/install/
-        elif [ '${OS}' == 'LINUX' ]; then
+        elif [[ "${OS}" == "LINUX" ]]; then
         xdg-open https://docs.docker.com/install/linux/docker-ce/ubuntu/
-        elif [ '${OS}' == 'WINDOWS' ]; then
+        elif [[ "${OS}" == "WINDOWS" ]]; then
         start https://docs.docker.com/docker-for-windows/install/
     fi
 }
 
 docker_compose_web () {
     msg "docker-compose not installed. See https://docs.docker.com/compose/install/"
-    if [ '${OS}' == 'OSX' ]; then
+    if [[ "${OS}" == "OSX" ]]; then
         open https://docs.docker.com/compose/install/
-        elif [ '${OS}' == 'LINUX' ]; then
+        elif [[ "${OS}" == "LINUX" ]]; then
         xdg-open https://docs.docker.com/compose/install/
-        elif [ '${OS}' == 'WINDOWS' ]; then
+        elif [[ "${OS}" == "WINDOWS" ]]; then
         start https://docs.docker.com/compose/install/
     fi
 }
@@ -109,7 +109,7 @@ check_docker_ver () {
 # verify docker
 msg "Verify docker installation"
 check_docker_ver
-if [ $? -eq 0 ]; then msg "OK"; 
+if [[ "$?" == "0" ]]; then msg "OK"; 
 else msg "Missing required docker version, please check requirements";
 fi
 
@@ -139,7 +139,6 @@ for service in ${SERVICES[@]}; do
     cd ${SCRIPT_BASE_PATH}
 done
 
-flag=$?
-if [ ${flag} -eq 0 ]; then
+if [[ "$?" == "0" ]]; then
   msg "Done!"
 fi
