@@ -1,5 +1,5 @@
 # Dmitry Kisler © 2019
-# admin@dkisler.com
+# www.dkisler.com
 
 import os
 import pytest
@@ -10,6 +10,8 @@ from types import ModuleType
 import inspect
 import pandas as pd
 import numpy as np
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
 DIR = Path(os.path.abspath(__file__)).parents[2]
@@ -19,25 +21,19 @@ SUFFIX = "v1"
 MODULE = "model"
 
 model_methods = ['_model_definition', 'predict',
-                 'score', 'model_eval',
-                 'train', 'grid_search',
-                 'save', 'load']
+                 'score', 'model_eval', 
+                 'train', 'save', 'load']
 
 model_score = ['mse']
 
-# TODO: add train dataset sample
-DATASET = """"att1","att2","att3","att4","att5","att6","att7","att8","att9","att10","att11","att12","att13","att14","att15","att16","att17","att18","att19","att20","att21","att22","att23","att24","att26","att27","att28","att29","att30","att31","att32","att33","att34","att36","att37","att38","att39","att40","att41","att42","att43","att44","att45","att46","att47","att48","att49","att50","att51","att52","att53","att54","att55","att56","att57","att58","att59","att60","att61","att62","att63","att64","att65","att66","att67","att68","att69","att70","att71","att72","att73","att74","att75","att76","att77","att78","att79","att80","att81","att82","att83","att84","att85","att86","att87","att88","att89","att90","att91","att92","att93","att94","att95","att96","att97","att98","att99","att100","att101","att102","att103","att104","att105","att106","att107","att108","att109","att110","att111","att112","att113","att114","att115","att116","att117","att118","att119","att120","att121","att122","att123","att124","att125","att126","att127","att128","att129","att130","att131","att132","att133","att134","att135","att136","att137","att138","att139","att140","att141","att142","att143","att144","att145","att146","att147","att148","att149","att150","att151","att152","att153","att154","att155","att156","att157","att158","att159","att160","cr"
-1,0,1,0,1,0,1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0.0
-1,0,1,0,1,0,1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0.0
-1,0,1,0,1,0,1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0.0
-1,0,1,0,1,0,1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.5
+DATASET = """cr,entity_id,computer,smartphone,attrs_scale,att5,att27,att2,att34,att29,att30,att9,att7,att142,att11
+0.0,4,1,0,0.531555207504427,1,0,0,1,1,0,0,0,0,0
 """
 
 DATASET = pd.read_csv(StringIO(DATASET))
 
-DATASET_MODEL_COL = [f"att{i}" for i in range(1, 160, 1)
-                     if i not in [26, 35]]
-DATASET_MODEL_COL.append('cr')
+DATASET_MODEL_COL = [*["entity_id", "cr", "computer", "smartphone", "attrs_scale"],
+                     *[f"att{i}" for i in [2, 5, 6, 7, 9, 11, 27, 28, 29, 30, 34, 142]]]
 
 
 def load_module(module_name: str) -> ModuleType:
@@ -71,7 +67,6 @@ module = load_module(MODULE)
 def test_module_has_model_class():
     assert 'Model' in module.__dir__(), \
         f"Model class is not present in the {MODULE}.py"
-    return
 
 
 def test_model_class_methods():
@@ -84,7 +79,6 @@ def test_model_class_methods():
 def test_module_has_preparation_func():
   assert 'data_preparation' in module.__dir__(), \
       f"data_preparation function is not present in the {MODULE}.py"
-  return
 
 
 def test_model_eval_elements():
@@ -97,11 +91,21 @@ np.random.seed(2019)
 model = module.Model()
 
 
-def test_module_data_preparation():
-    X_train, X_test,\
-        y_train, y_test, err = module.data_preparation(DATASET)
-    assert err is None, \
-        f"Data prep error: {err}"  
+def test_module_data_preparation_train():
+    X, y, err = module.data_preparation(DATASET)
+    if err:
+        raise Exception(err)
+    assert y[0] == 0, \
+        "data_preparation function error"
+    missing_columns = list(set(X.columns).difference(DATASET_MODEL_COL))
+    assert len(missing_columns) == 0, \
+        f"Columns {', '.join(missing_columns)} are not present in the prepared data set"    
+
+
+def test_module_data_preparation_predict():
+    X, y, err = module.data_preparation(DATASET, target_col=None)
+    if err:
+        raise Exception(err)
 
 
 def test_define_model():
@@ -111,11 +115,13 @@ def test_define_model():
 
 
 def test_train_model():
-    pass
-
-
-def test_grid_search():
-    pass
+    X, y, err = module.data_preparation(DATASET)
+    if err:
+        assert Exception(err)
+        
+    model_score = model.train(X, y)
+    assert model is not None, \
+        "Model train error"
 
 
 def test_save_model():

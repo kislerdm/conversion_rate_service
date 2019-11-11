@@ -1,3 +1,6 @@
+# Dmitry Kisler © 2019
+# www.dkisler.com
+
 import os
 from setuptools import setup
 

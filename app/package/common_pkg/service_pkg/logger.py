@@ -1,5 +1,5 @@
 # Dmitry Kisler © 2019
-# admin@dkisler.com
+# www.dkisler.com
 
 import os
 import sys

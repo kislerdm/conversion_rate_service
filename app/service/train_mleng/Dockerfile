@@ -33,13 +33,13 @@ ENV MODEL_VERSION=${MODEL_VERSION}
 
 # GCP buckets
 ARG BUCKET_DATA
-ENV BUCKET_DATA=${BUCKET_DATA}
+ENV BUCKET_DATA=${BUCKET_DATA_GCP}
 
 ARG BUCKET_CONFIG
-ENV BUCKET_CONFIG=${BUCKET_CONFIG}
+ENV BUCKET_CONFIG=${BUCKET_CONFIG_GCP}
 
 ARG BUCKET_MODEL
-ENV BUCKET_MODEL=${BUCKET_MODEL}
+ENV BUCKET_MODEL=${BUCKET_MODEL_GCP}
 
 WORKDIR /app
 
@@ -52,12 +52,11 @@ COPY package libs
 RUN pip install --upgrade pip \
   # install custom packages and dependencies
   && pip install --no-cache-dir pytest -r requirements.txt \
-  # install model package OS dependencies
-  && apt-get install libgomp1 -y \
-  # && chmod +x libs/model_pkg/conversion_rate_model/${MODEL_VERSION}/os_dependencies.sh \
-  # && exec libs/model_pkg/conversion_rate_model/${MODEL_VERSION}/os_dependencies.sh \
+  # install dependencies
+  && export PATH_MISC=libs/model_pkg/conversion_rate_model/${MODEL_VERSION}/install_dependencies.sh \
+  && if [ -f ${PATH_MISC} ]; then chmod +x ${PATH_MISC} && ./${PATH_MISC}; fi \
   # test the model modules
-  && pytest -v libs/model_pkg/tests/*.py \
-  && if [ -d libs/model_pkg/tests/${MODEL_VERSION} ]; then pytest -v libs/model_pkg/tests/${MODEL_VERSION}/; fi
+  && pytest -v -W ignore libs/model_pkg/tests/*.py \
+  && if [ -d libs/model_pkg/tests/${MODEL_VERSION} ]; then pytest -v -W ignore libs/model_pkg/tests/${MODEL_VERSION}/; fi
 
 ENTRYPOINT [ "python", "runner.py" ]

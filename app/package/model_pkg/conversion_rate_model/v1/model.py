@@ -1,17 +1,16 @@
 # Dmitry Kisler © 2019
-# admin@dkisler.com
+# www.dkisler.com
 
 import os
-import sys
 from typing import Tuple, NamedTuple
 import pandas as pd
 import numpy as np
 import pickle
 from sklearn import metrics
 from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import GridSearchCV
-import xgboost
 import importlib.util
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 # import model abstract class
 module_name = "model_template"
@@ -33,22 +32,18 @@ class Model(model_template.Model):
                  model=None):
         self.model = model
 
-    def _model_definition(self, 
+    def _model_definition(self,
                           config=None):
         """Function to define and compile the model
-            
-           Args:
-                config: dict with model hyperparameters
-           
-           Returns:
-                model object
+
+        Args:
+            config: dict with model hyperparameters
+
+        Returns:
+            model object
         """
         if self.model is None:
-            if config is None:
-                self.model = xgboost.XGBRegressor(objective='reg:squarederror')
-            else:
-                self.model = xgboost.XGBRegressor(**config, 
-                                                  objective='reg:squarederror')
+            self.model = LinearRegression()
 
     def train(self,
               X: pd.DataFrame,
@@ -56,13 +51,13 @@ class Model(model_template.Model):
                                           mse=float):
         """Train method
 
-           Args:
-                X: pd.DataFrame with features values
-                y: target column values
+        Args:
+            X: pd.DataFrame with features values
+            y: target column values
 
-           Returns: 
-                namedtuple with metrics values: 
-                    "mse": float
+        Returns: 
+            namedtuple with metrics values: 
+                "mse": float
         """
         if self.model is None:
             self._model_definition()
@@ -72,50 +67,19 @@ class Model(model_template.Model):
         y_pred = self.predict(X)
         model_eval = self.score(y_true=y, y_pred=y_pred)
         return model_eval
-    
-    def grid_search(self,
-                    X: pd.DataFrame,
-                    y: pd.Series,
-                    config: dict) -> NamedTuple('model_eval',
-                                                mse=float):
-        """Function for hyper-parameters tuning to search best configuration of the estimator
-           Results in the best tuned estimator object being assigned to the Model.model attr
-           
-           Args:
-                X: pd.DataFrame with features values
-                y: target column values
-                config: dictionary with a grid of hyperparameters
-
-           Returns: 
-                namedtuple with metrics values: 
-                    "mse": float
-        """
-        if self.model is None:
-            self._model_definition(config=None)
-        
-        grid = GridSearchCV(self.model,
-                            param_grid=config,
-                            cv=3,
-                            n_jobs=-1,
-                            verbose=5)
-        # find best tuned estimator
-        grid.fit(X, y)
-        self.model = grid.best_estimator_
-        
-        # evalute on train set
-        y_pred = self.predict(X)
-        model_eval = self.score(y_true=y, y_pred=y_pred)
-        return model_eval
 
     def save(self, path: str):
         """Model saver method
 
-           Args:
-                path: path to save model into 
+        Args:
+            path: path to save model into
+
+        Raises:
+            IOError, save error
         """
         try:
             if not os.path.isdir(path):
-                os.makedirs(path)                
+                os.makedirs(path)
             with open(os.path.join(path, 'model.pkl'), 'wb') as f:
                 pickle.dump(self.model, f)
         except Exception as ex:
@@ -124,8 +88,11 @@ class Model(model_template.Model):
     def load(self, path: str):
         """Model loader method
 
-           Args:
-                path: path to save model into 
+        Args:
+            path: path to save model into
+
+        Raises:
+            IOError, load error
         """
         try:
             with open(path, 'rb') as f:
@@ -133,11 +100,14 @@ class Model(model_template.Model):
         except Exception as ex:
             raise ex
 
-    def predict(self, X: pd.DataFrame):
+    def predict(self, X: pd.DataFrame) -> pd.Series:
         """Predict method
 
-           Args:
-                X: pd.DataFrame with features values
+        Args:
+            X: pd.DataFrame with features values
+
+        Raises:
+            Prediction error
         """
         if self.model is None:
             return None

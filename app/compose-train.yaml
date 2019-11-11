@@ -1,0 +1,21 @@
+version: "3.7"
+services:
+  train:
+    image: service/train:${MODEL_VER}
+    build:
+      context: .
+      dockerfile: "service/train/Dockerfile"
+      args:
+        - MODEL_VERSION=${MODEL_VER}
+    volumes:
+      - type: bind
+        source: ${BUCKET_DATA_TRAIN}
+        target: /data
+      - type: bind
+        source: ${BUCKET_MODEL}
+        target: /model
+    environment:
+      - WEBHOOK_URL=${WEBHOOK}
+      - PREFIX_MODEL=${MODEL_PREFIX}
+      - PATH_DATA_TRAIN=${PATH_TRAIN}
+      - PATH_DATA_EVAL=${PATH_EVAL}
