@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   train-mleng:
-    image: gcr.io/sellics/service/trainer:${MODEL_VER}
+    image: ${MLENG_IMG}
     build:
       context: .
       dockerfile: "service/train_mleng/Dockerfile"
