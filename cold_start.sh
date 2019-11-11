@@ -91,7 +91,7 @@ fi
 
 # smoke test
 msg "Run end2end smoke test"
-sh smoke_test/runner.sh 
+chmod +x smoke_test/runner.sh && ./smoke_test/runner.sh
 if [[ "$?" != "0" ]]; then
     msg "Smoke test wasn't finished sucessfully"
     exit 1
@@ -101,6 +101,7 @@ fi
 msg "Copy prepared data sets as date-partitioned objects"
 # train data sets
 TMP_DIR=${SCRIPT_BASE_PATH}/bucket/data/train/features_v1
+if [ ! -d ${TMP_DIR}/$(date +'%Y/%m/%d') ]; then mkdir -p ${TMP_DIR}/$(date +'%Y/%m/%d'); fi
 cp -v ${TMP_DIR}/*.gz ${TMP_DIR}/$(date +'%Y/%m/%d')/
 if [[ "$?" != "0" ]]; then
     msg "Check the repo. Bucket dir seems to be corrupted"
@@ -109,6 +110,7 @@ fi
 
 # predict data sets
 TMP_DIR=${SCRIPT_BASE_PATH}/bucket/data/predict/input/features_v1
+if [ ! -d ${TMP_DIR}/$(date +'%Y/%m/%d') ]; then mkdir -p ${TMP_DIR}/$(date +'%Y/%m/%d'); fi
 cp -v ${TMP_DIR}/*.gz ${TMP_DIR}/$(date +'%Y/%m/%d')/
 if [[ "$?" != "0" ]]; then
     msg "Check the repo. Bucket dir seems to be corrupted"
