@@ -129,11 +129,14 @@ for service in ${SERVICES[@]}; do
     fi
     if [ ${BUILD_ONLY} -eq 1 ]; then
         docker-compose -f compose-${service}.yaml build
+        if [[ "$?" != "0" ]]; then exit 1; fi
     else
         if [ ${FORCE} -eq 1 ]; then 
             docker-compose -f compose-${service}.yaml up --build
+            if [[ "$?" != "0" ]]; then exit 1; fi
         else
             docker-compose -f compose-${service}.yaml up
+            if [[ "$?" != "0" ]]; then exit 1; fi
         fi
     fi
     cd ${SCRIPT_BASE_PATH}

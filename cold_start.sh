@@ -84,7 +84,7 @@ check_docker_ver || exit 1
 # build service images
 msg "Build docker images"
 docker-compose -f ${SCRIPT_BASE_PATH}/cold-start.yaml build
-if [[ "$?" != '0' ]]; then
+if [[ "$?" != "0" ]]; then
     msg "Error while building images. Please contact admin@dkisler.com"
     exit 1
 fi
@@ -92,7 +92,7 @@ fi
 # smoke test
 msg "Run end2end smoke test"
 sh smoke_test/runner.sh 
-if [[ "$?" != '0' ]]; then
+if [[ "$?" != "0" ]]; then
     msg "Smoke test wasn't finished sucessfully"
     exit 1
 fi
@@ -102,7 +102,7 @@ msg "Copy prepared data sets as date-partitioned objects"
 # train data sets
 TMP_DIR=${SCRIPT_BASE_PATH}/bucket/data/train/features_v1
 cp -v ${TMP_DIR}/*.gz ${TMP_DIR}/$(date +'%Y/%m/%d')/
-if [[ "$?" != '0' ]]; then
+if [[ "$?" != "0" ]]; then
     msg "Check the repo. Bucket dir seems to be corrupted"
     exit 1
 fi
@@ -110,7 +110,7 @@ fi
 # predict data sets
 TMP_DIR=${SCRIPT_BASE_PATH}/bucket/data/predict/input/features_v1
 cp -v ${TMP_DIR}/*.gz ${TMP_DIR}/$(date +'%Y/%m/%d')/
-if [[ "$?" != '0' ]]; then
+if [[ "$?" != "0" ]]; then
     msg "Check the repo. Bucket dir seems to be corrupted"
     exit 1
 fi
