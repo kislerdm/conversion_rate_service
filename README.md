@@ -22,13 +22,13 @@ A data science project flow described in [the article](https://towardsdatascienc
    - Model package extension
 
 ---
-The main objective of the proposed solution is completed the *stages 1 and 2*:
+The main objective of the proposed solution is, to complete the *stages 1 and 2*:
 
 - to build the predictor service *MVP* model;
 - to propose a production ready architecture to hit the main objective of the problem;
 - to build production ready *train and serve data pipelines*.
 
-Additional objective is, to improve the model performance of the model.
+Additional objective is, to improve the model performance.
 
 ---
 
