@@ -32,7 +32,7 @@ Additional objective is, to improve the model performance of the model.
 
 ---
 
-**!Note!** Ideas for strategic task can be found [here](docs/strategic_task/sellics_strategic_projects.md).
+**!Note!** The ideas for strategic task can be found [here](docs/strategic_task/sellics_strategic_projects.pdf).
 
 ## How to execute the code base
 
@@ -161,7 +161,7 @@ An illustrates above architecture can be proposed to host the data pipelines req
 Depending on the data amount the serve service can be deployed and executed
 
 - using AWS ECS+Fargate, or on GCP Cloud Run services. GCP however would require to convert existing service to web-servers.
-- using AWS Sagemaker, or on [GCP ML Engine](#model-re-train-on-a-cloud) in case higher scalability at low effort would be required.
+- using [AWS Sagemaker](https://aws.amazon.com/sagemaker/), or on [GCP ML Engine](#model-re-train-on-a-cloud) in case higher scalability at low effort would be required.
 
 The pipeline part shown inside the dashed rectangle is being built and considered within the scope of this task exclusively. It is being mimicked using local disk storage instead of s3 buckets and local docker runner machine instead of ECS+Fargate/GCP Cloud Run services.
 
@@ -181,12 +181,12 @@ The pipeline part shown inside the dashed rectangle is being built and considere
 1. Read train and eval data sets from the source, e.g. s3, or gs bucket (mimicked by reading data from disk)
 2. Perform data preparation to comply with the model input data structure SLA
 3. Run prediction
-4. Save the prediction results as compressed flat data file (csv) with the following structure (output SLA):
+4. Save the prediction results as compressed flat gzip data file (csv.gz) with the following structure (output SLA):
 
 ```
 entity_id,device,cr
-20458,0,0.03653155867612641
-20458,1,0.026293864889505317
+4,Computer,0.03653155867612641
+5,Computer,0.026293864889505317
 ```
 
 Both services push an alert/info message as a webhook to slack (requires WEBHOOK_URL env parameter to be set).
@@ -206,23 +206,40 @@ Please see details of experimentation in the jupyter notebook ``./analytics/anal
 |model_v2|18712|17949|18559|1.4|XGBoost regressor trainer on *v1* data set
 |model_v3|18653|17880|18498|0.3|XGBoost regressor (hypertuning) trainer on *v1* data set
 
-### Model Re-train on a Cloud - ToDo
+### Model Re-train on a Cloud
 
-GCP ML Engine is being used for faster model experimentation and retraining:
+GCP ML Engine was used for fast brute force (brute force training didn't work this time though :) ) model experimentation and fine-tuning. GCP was used for a simple reason - I had free GCP credits :)
 
-1. Build a generic service
-2. Add model to the model_pkg
-3. Build a train service image
-4. Push the image container to the google container registry (gcr)
-5. Push a set of hyper-parameters to google cloud storage bucket (gs)
-6. Trigger a training job
+The service code base is present in `./app/service/train_mleng`. Deployment steps:
 
-Infra:
-
-```yaml
-- GS:
-  - 
+1. 
+```bash 
+cd ./app/service/train_mleng
+``` 
+2. Modify ``.env_mleng.sh`` to contain your gs buckets info
+3. Execute
+```bash
+source .env_mleng.sh
+export GCP_RPOJECT=yourproject
+export MLENG_IMG=gcr.io/GCP_RPOJECT/service/mleng:1
+cd ../
+docker-compose -f compose-train-mleng.yaml build
 ```
+4. You should install gcloud and authenticated (ideally as a service-account)
+5. Push image to cloud registry
+```bash
+gcloud docker -- push ${MLENG_IMG}
+```
+6. Copy train and eval data sets into bucket you specified in ``.env_mleng.sh`` as ``BUCKET_DATA_GCP``
+7. Copy hyper parameters config yaml [file](bucket/config/mleng/grid/v2/params_v1.yaml) into the bucket you specified in ``.env_mleng.sh`` as ``BUCKET_CONFIG_GCP``
+8. Update ``./app/service/train_mleng/gcp_ai_submit.sh`` as required
+9. Trigger the training job by 
+```bash
+chmod +x ./app/service/train_mleng/gcp_ai_submit.sh \
+&& ./app/service/train_mleng/gcp_ai_submit.sh
+```
+10. The final model to be saved into the bucket specified in ``.env_mleng.sh`` as ``BUCKET_MODEL_GCP``
+
 
 ## Followup/further ToDo's
 
@@ -232,7 +249,7 @@ Infra:
 - Add ci/cd
 - Add metrics push to cloudwatch, or prometheus integration
 - Orchestrator for pipelines, e.g. with apache airflow
-- Deploy the serve service as web-serve to make real-time conversion rate prediction
+- Deploy the serve service as web-server to potentially integrate conversion rate prediction model into microservice architecture
 
 ### Model
 
