@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 
 # script to install Linux dependencies required by python package
 # Dmitry Kisler © 2019
