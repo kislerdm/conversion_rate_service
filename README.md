@@ -170,18 +170,19 @@ The pipeline part shown inside the dashed rectangle is being built and considere
 #### Train Service
 
 1. Read train and eval data sets from the source, e.g. s3, or gs bucket (mimicked by reading data from disk)
-2. Perform data preparation to comply with the model input data structure SLA *)
-3. Train the model
+2. Train the model
+3. Evaluate the model performance if eval data set provided
 4. Save the model metadata into destination, e.g. s3, or gs bucket
 
-*) It is advised to perform all data preparation on the level of data platform/DWH (e.g. in redshift, or snowflake, or bigquery) steps prior to training stage. **!Note!** the services for in-database data preparation and for unloading data from database to the bucket are beyond the scope of this task. The train/eval/predict data sets are being prepared and stored in `bucket/data` (see details in [the notebook](#modelingexperimentation)).
+Data sets preparation to be done on the level of data platform/DWH (e.g. in redshift, or snowflake, or bigquery) steps prior to training stage. 
+
+**!Note!** the services for in-database data preparation and for unloading data from database to the bucket are beyond the scope of this task. The train/eval/predict data sets are being prepared and stored in `bucket/data` (see details in [the notebook](#modelingexperimentation)).
 
 #### Serve Service
 
 1. Read train and eval data sets from the source, e.g. s3, or gs bucket (mimicked by reading data from disk)
-2. Perform data preparation to comply with the model input data structure SLA
-3. Run prediction
-4. Save the prediction results as compressed flat gzip data file (csv.gz) with the following structure (output SLA):
+2. Run prediction
+3. Save the prediction results as compressed flat gzip data file (csv.gz) with the following structure (output SLA):
 
 ```
 entity_id,device,cr
@@ -189,11 +190,22 @@ entity_id,device,cr
 5,Computer,0.026293864889505317
 ```
 
+Data sets preparation to be done on the level of data platform.
+
 Both services push an alert/info message as a webhook to slack (requires WEBHOOK_URL env parameter to be set).
 
 ## Modeling/Experimentation
 
 Please see details of experimentation in the jupyter notebook ``./analytics/analytics.ipynb``. It should be accessible on http://localhost:9999/lab/tree/analytics/analytics.ipynb if you successfully completed [the first-time run step](#first-time-run).
+
+### Features Engineering
+
+The solution MVP and the models below were trained on the data sets with features set *features_v1* (see ``./analytics/analytics.ipynb`` for details):
+
+```
+cr,entity_id,computer,smartphone,attrs_scale,att5,att27,att2,att34,att29,att30,att9,att7,att142,att11
+0.0,4,1,0,0.531555207504427,1,0,0,1,1,0,0,0,0,0
+```
 
 ### Models Performance
 
