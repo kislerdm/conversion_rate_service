@@ -5,7 +5,7 @@ PREFIX=$(date +'%Y/%m/%d')/e2e_test
 export BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." >/dev/null && pwd )"
 
 SLA_HEADER="entity_id,device,cr"
-EXPECTED_OUTPUT="20458,1,0"
+EXPECTED_OUTPUT="6,Computer,0"
 
 export MODEL_VER="v1"
 export BUCKET_MODEL=${BASE_DIR}/bucket/model

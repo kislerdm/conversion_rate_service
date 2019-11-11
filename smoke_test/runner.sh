@@ -33,7 +33,7 @@ cp -r ${SCRIPT_BASE_PATH}/data/train/*.csv.gz ${BUCKET_DATA_TRAIN}/${PREFIX}
 docker-compose -f ${BASE_DIR}/app/compose-train.yaml up
 flag=$?
 rm -rf ${BUCKET_DATA_TRAIN}/${PREFIX}
-if [ ! ${flag} -eq 0 ]; then
+if [[ "${flag}" != "0" ]]; then
   msg "Train service test [FAILED]"
   exit 1
 fi
@@ -53,8 +53,7 @@ if [ ! -f ${BUCKET_MODEL}/${PATH_MODEL} ]; then
   cp -r ${SCRIPT_BASE_PATH}/model/${MODEL_VER}/* ${BUCKET_MODEL}/${MODEL_PREFIX}
 fi
 docker-compose -f ${BASE_DIR}/app/compose-serve.yaml up
-flag=$?
-if [ ! ${flag} -eq 0 ]; then
+if [[ "$?" != "0" ]]; then
   rm -rf ${BUCKET_MODEL}/${MODEL_PREFIX} ${BUCKET_DATA_PREDICT}/input/${PREFIX}
   msg "Serve service test [FAILED]"
   exit 1
