@@ -1,5 +1,5 @@
 # Dmitry Kisler © 2019
-# admin@dkisler.com
+# www.dkisler.com
 
 import os
 import time
@@ -36,12 +36,35 @@ PATH_DATA_OUT = os.getenv("PATH_DATA_OUT",
                                        time.strftime('%Y/%m/%d'),
                                        "predict_output.csv.gz"))
 
-COL_DIMS = ["entity_id", "device"]
-COL_TARGET = 'cr'
 
+def data_output_sla(df: pd.DataFrame,
+                    y_pred: pd.Series) -> pd.DataFrame:
+    """Function to align prediction output with SLA
+    
+    Args:
+        df: intput dataframe 
+        y_pred: predictions vector
+    
+    Returns:
+        pd.DataFrame
+    """
+    COL_LOSE = ["computer", "smartphone"]
+    COL_DIMS = ["entity_id", *COL_LOSE]
+    COL_TARGET = 'cr'
+
+    result = df[COL_DIMS].copy()
+    result["device"] = "Computer"
+    result.loc[result["smartphone"] == 1,
+               "device"] = "Smartphone"
+    result.loc[(result["smartphone"] == 0) & (result["computer"] == 0),
+               "device"] = "Tablet"
+    result[COL_TARGET] = y_pred
+    result.drop(COL_LOSE, axis=1, inplace=True)
+    
+    return result
+    
 
 if __name__ == "__main__":
-
     logs = getLogger(logger=f"service/serve/{MODEL_VERSION}",
                      webhook_url=WEBHOOK_URL)
 
@@ -92,7 +115,6 @@ if __name__ == "__main__":
     try:
         prediction_results = model.predict(X)
         t = round(time.time() - t0, 2)
-        df_prediction = pd.DataFrame({COL_TARGET: prediction_results})
         logs.send(f"Prediction completed. Elapsed time: {t} sec. Saving results.", 
                   is_error=False)
     except Exception as ex:
@@ -102,8 +124,7 @@ if __name__ == "__main__":
 
     # convert results to comply with the output SLA
     try:
-        df_prediction_results = pd.concat([df[COL_DIMS], df_prediction], 
-                                          axis=1)
+        df_prediction_results = data_output_sla(df.copy(), prediction_results)
     except Exception as ex:
         logs.send(f"Cannot convert prediction according to output SLA. Error:\n{ex}",
                   lineno=logs.get_line(),
