@@ -6,7 +6,7 @@
 
 pkgs="libgomp1"
 
-if [[ ${pkgs} == '' ]]; then
+if [[ "${pkgs}" == "" ]]; then
   exit 0
 fi
 
@@ -16,7 +16,7 @@ fi
 
 OS_ID=$(cat /etc/os-release | grep -i "^id=" | awk -F "=" '{print $2}' | sed 's/"//g')
 
-if [ ! $? -eq 0 ]; then
+if [[ "$?" != "0" ]]; then
   echo "Unrecognized OS"; exit 1
 fi
 
