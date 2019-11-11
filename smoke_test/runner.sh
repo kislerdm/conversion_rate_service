@@ -45,26 +45,26 @@ fi
 msg "[PASSED]"
 
 msg "Test: trigger serve service"
-if [ ! -d ${BUCKET_DATA_PREDICT}/input/${PREFIX} ]; then 
-  mkdir -p ${BUCKET_DATA_PREDICT}/input/${PREFIX}
+if [ ! -d ${BUCKET_DATA_PREDICT}/input/${DATA_VER}/${PREFIX} ]; then 
+  mkdir -p ${BUCKET_DATA_PREDICT}/input/${DATA_VER}/${PREFIX}
 fi
-cp -r ${SCRIPT_BASE_PATH}/data/predict/prediction_input.csv.gz ${BUCKET_DATA_PREDICT}/input/${PREFIX}
+cp ${SCRIPT_BASE_PATH}/data/predict/prediction_input.csv.gz ${BUCKET_DATA_PREDICT}/${PATH_DATA_IN}
 if [ ! -f ${BUCKET_MODEL}/${PATH_MODEL} ]; then
   cp -r ${SCRIPT_BASE_PATH}/model/${MODEL_VER}/* ${BUCKET_MODEL}/${MODEL_PREFIX}
 fi
 docker-compose -f ${BASE_DIR}/app/compose-serve.yaml up
 if [[ "$?" != "0" ]]; then
-  rm -rf ${BUCKET_MODEL}/${MODEL_PREFIX} ${BUCKET_DATA_PREDICT}/input/${PREFIX}
+  rm -rf ${BUCKET_MODEL}/${MODEL_PREFIX} $(dirname "${BUCKET_DATA_PREDICT}/${PATH_DATA_IN}")
   msg "Serve service test [FAILED]"
   exit 1
 fi
 
-# test prediction output complience with SLA
+# # test prediction output complience with SLA
 header=$(zless ${BUCKET_DATA_PREDICT}/${PATH_DATA_OUT} | head -1)
 if [[ ${header} != "${SLA_HEADER}" ]]; then
   rm -rf ${BUCKET_MODEL}/${MODEL_PREFIX} \
-         ${BUCKET_DATA_PREDICT}/input/${PREFIX} \
-         ${BUCKET_DATA_PREDICT}/output/${PREFIX}
+         $(dirname "${BUCKET_DATA_PREDICT}/${PATH_DATA_IN}") \
+         $(dirname "${BUCKET_DATA_PREDICT}/${PATH_DATA_OUT}")
   msg "Serve service test [FAILED]"
   msg "Output data don't match output SLA"
   exit 1
@@ -77,7 +77,7 @@ fi
 
 msg "[PASSED]"
 
-rm -rf ${BUCKET_MODEL}/${PREFIX} \
-       ${BUCKET_DATA_PREDICT}/input/${PREFIX} \
-       ${BUCKET_DATA_PREDICT}/output/${PREFIX}
+rm -rf ${BUCKET_MODEL}/${MODEL_PREFIX} \
+       $( dirname "${BUCKET_DATA_PREDICT}/${PATH_DATA_IN}") \
+       $( dirname "${BUCKET_DATA_PREDICT}/${PATH_DATA_OUT}")
 msg "end2end smoke test [PASSED]"
