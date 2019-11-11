@@ -52,7 +52,7 @@ def get_args():
     return args
 
 
-PROJECT_ID = os.getenv(“PROJECT_ID”, "sellics”)
+PROJECT_ID = os.getenv("PROJECT_ID", "sellics")
 
 MODEL_PKG_NAME = "conversion_rate_model"
 MODEL_VERSION = os.getenv("MODEL_VERSION", "v1")
