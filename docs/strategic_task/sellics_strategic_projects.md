@@ -1,5 +1,7 @@
 # Sellics - Strategic Data Science Projects
 
+**By Dmitry Kisler - www.dkisler.com**
+
 The problem is stated in [here](../instructions/strategical_test-HoDS.pdf). I would formulate the objective of the task as how to maximize Sellics clients long-term *profit* by 
 
 - employing machine learning for status quo Sellics ecosystem
