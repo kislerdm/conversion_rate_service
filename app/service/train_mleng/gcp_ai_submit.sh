@@ -1,7 +1,7 @@
 #! /bin/sh
 
 VERSION=$1
-PROJECT_ID=sellics
+PROJECT_ID=cr_model
 REGION=us-central1
 PARAMS=params_v2
 
