@@ -1,8 +1,26 @@
-# Conversion Rate Prediction Service
+# Amazon Key Words Conversion Rate Prediction Service
 
-![sellics_logo](https://sellics.com/wp-content/uploads/2018/02/sellics-fb.jpg)
+## The problem objective
 
-The problem description can be found [here](docs/instructions/technical_test_-_instructions.pdf). Its main objective is, *to develop a service to predict conversion rate probability* for users searching a given keyword based on the keyword attributes and the device users used for a search.
+The main objective of this demo project is, *to develop a service to predict conversion rate probability* for amazon keywords based on their attributes and the device users used for a search.
+
+## Definitions
+
+Conversion rate (CR) is the probability of a certain key word search to lead to a conversion into a sale event.
+
+## Data dictionary
+
+The service model(s) to be built using the [data set](./bucket/data/raw/technical_test_training_data.csv.xz) with the following structure:
+
+|column|type|comment|
+|---|---|---|
+|entity_id|int|key word ID|
+|attI|bool|key word's attribute <em>I = [1-160]</em>|
+|device|string|device users used for a search, categories: {Computer, Tables, Smartphone}|
+|clicks|int|number of clicks on the key word|
+|conversion|int|number of conversions led by the key word|
+
+## Project flow
 
 A data science project flow described in [the article](https://towardsdatascience.com/how-to-power-up-your-product-by-machine-learning-with-python-microservice-pt-1-de0f2b434bec) is being followed. The task is being split into **three stages**:
 
@@ -29,10 +47,6 @@ The main objective of the proposed solution is, to complete the *stages 1 and 2*
 - to build production ready *train and serve data pipelines*.
 
 Additional objective is, to improve the model performance.
-
----
-
-**!Note!** The ideas for strategic task can be found [here](docs/strategic_task/sellics_strategic_projects.pdf).
 
 ## How to execute the code base
 
